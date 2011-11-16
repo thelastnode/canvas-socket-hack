@@ -1,0 +1,69 @@
+h1= title
+p Welcome to #{title}
+
+canvas(id='canvas', width=500, height=500, style='border: black 1px solid')
+
+script(type='text/javascript')
+  var socket = io.connect('/');
+
+  function drawPath(ctx, a, b) {
+      if (typeof b == null || b == null) {
+          ctx.beginPath();
+          ctx.arc(a[0], a[1], 1, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fill();
+          return;
+      }
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]);
+      ctx.lineTo(b[0], b[1]);
+      ctx.closePath();
+      ctx.stroke();
+  }
+
+  $(function(){
+      var canvas = document.getElementById('canvas');
+      
+      if (!canvas.getContext) {
+          return;
+      }
+      
+      var drawing = false;
+      var lastpoint = null;
+      var ctx = canvas.getContext('2d');
+
+      var canvasX = $(canvas).offset().left;
+      var canvasY = $(canvas).offset().top;
+
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 1;
+      
+      
+      $(canvas).mousedown(function(e) {
+          drawing = true;
+          lastpoint = [e.pageX - canvasX, e.pageY - canvasY];
+          drawPath(ctx, lastpoint);
+          socket.emit('path', {
+              a: lastpoint
+          });
+      });
+      $(canvas).mouseup(function() {
+          drawing = false;
+          lastpoint = null;
+      });
+      $(canvas).mousemove(function(e) {
+          if (drawing) {
+              var p = [e.pageX - canvasX, e.pageY - canvasY];
+              drawPath(ctx, p, lastpoint);
+              socket.emit('path', {
+                  a: p,
+                  b: lastpoint
+              });
+              lastpoint = p;
+          }
+      });
+
+      socket.on('path', function(data) {
+          drawPath(ctx, data.a, data.b);
+      });
+  });
