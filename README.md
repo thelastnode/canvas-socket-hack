@@ -13,5 +13,8 @@ it. Then point your favorite modern browser to your IP at port 3000.
 [node]: http://nodejs.org/
 [npm]: http://npmjs.org/
 
+# License
+Public domain, see UNLICENSE.
+
 # Author
 Ankit Shankar (`ankitshankar+gh@gmail.com`)
